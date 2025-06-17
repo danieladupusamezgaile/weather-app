@@ -3,6 +3,7 @@ from tkinter import messagebox
 from weather_api import WeatherAPI
 from PIL import Image, ImageTk # Pillow for displaying icons
 import os
+import math
 
 class WeatherAppGUI:
     def __init__(self, root, api_key):
@@ -13,34 +14,31 @@ class WeatherAppGUI:
         self.root = root
         self.root.title("Weather App")
         # Adjust window size
-        self.root.geometry("300x300")
-        # Set min window size
-        self.root.minsize(300, 300)
-        # Set max window size
-        self.root.maxsize(300, 300)
-        # Light blue background
+        self.root.geometry("400x600")
+        self.root.minsize(400, 600)
+        self.root.maxsize(400, 600)
         self.root.config(bg="#628D9E")
         
         # Heading
-        self.header = tk.Label(root, text="WEATHER\n FORECAST", bg="#628D9E", font=("Arial", 36))
+        self.header = tk.Label(root, text="WEATHER\n FORECAST", bg="#628D9E", font=("Arial", 32))
         self.header.pack(pady=30)
-        """Input field"""
-        # Create Label
+
+        # Create Enter city Label
         self.city_label = tk.Label(root, text="Enter city:", bg="#628D9E", font=("Arial", 14))
-        # Pack the label with set y padding
+        # Pack the label set y padding
         self.city_label.pack(pady=5)
-        # Create input field
+        
+        # Create city input field
         self.city_entry = tk.Entry(root, bg="#628D9E", font=("Arial", 14), width=25)
-        # Pack the input field
         self.city_entry.pack(pady=10)
         
         # "Get Weather" button
-        self.get_weather_btn = tk.Button(root, text="Get Weather", font=("Arial", 14), command=self.open_weather_window)
-        # Pack the button
+        self.get_weather_btn = tk.Button(root, text="Get Weather", font=("Arial", 14), command=self.button)
         self.get_weather_btn.pack()
         
         
-    def open_weather_window(self):
+    def button(self):
+        # Save user input
         city_name = self.city_entry.get()
         if city_name:
             weather_data = self.weather_api.get_weather(city_name)
@@ -58,28 +56,33 @@ class WeatherAppGUI:
             weather_window.config(bg="#628D9E")
             # Adjust window size
             weather_window.geometry("400x600")
-            # Set min window size
             weather_window.minsize(400, 600)
-            # Set max window size
             weather_window.maxsize(400, 600)
-            # Light blue background
             self.root.config(bg="#628D9E")
             
             main = data['main']
             weather = data['weather'][0]
-            weather_info = f"Weather in {data['name']}, {data['sys']['country']}:\n"
-            weather_info += f"Temperature: {main['temp']}°C\n"
-            weather_info += f"Weather: {weather['description']}\n"
-            weather_info += f"Humidity: {main['humidity']}%\n"
-            weather_info += f"Pressure: {main['pressure']} hPa"
             
             # Display weather icon
             icon_code = weather['icon']
             self.update_weather_icon(weather_window, icon_code)
             
-            # Display weather info in the new window
-            weather_label = tk.Label(weather_window, text=weather_info, bg="#628D9E", font=("Arial", 14))
-            weather_label.pack(pady=10)
+            # Display city
+            city_label = tk.Label(weather_window, bg="#628D9E", text=f"{data['name']}, {data['sys']['country']}", font=("Arial", 22))
+            city_label.pack()
+            
+            # Display temperature
+            temp_label = tk.Label(weather_window, bg="#628D9E", text=f"{math.floor(main['temp'])}°", font=("Arial", 52))
+            temp_label.pack()
+            
+            # Display feels like
+            feels_like_label = tk.Label(weather_window, bg="#628D9E", text=f"Feels like: {math.floor(main['feels_like'])}°", font=("Arial", 14))
+            feels_like_label.pack()
+            
+            # Display min and max temp
+            min_max_temp_label = tk.Label(weather_window, bg="#628D9E", text=f"H:{math.floor(main['temp_max'])}° L:{math.floor(main['temp_min'])}°")
+            min_max_temp_label.pack()
+            
         else:
             self.display_error(text="No weather data to display.")
     
