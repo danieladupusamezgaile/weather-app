@@ -1,4 +1,8 @@
 import requests
+import logging
+
+# Configure logging
+logging.basicConfig(filename="weather_app.log", level=logging.INFO)
 
 class WeatherAPI:
     def __init__(self, api_key):
@@ -15,11 +19,12 @@ class WeatherAPI:
 
             # Check if the status code is 200 (OK)
             if response.status_code == 200:
+                logging.info(f"Successfully fetched weather data for {city_name}")
                 return response.json()  # Return the JSON data
             else:
-                print(f"Error: {response.status_code}")
+                logging.error(f"Error fetching data for {city_name}. Status code: {response.status_code}")
                 return None
 
         except requests.exceptions.RequestException as e:
-            print(f"Error with the request: {e}")
+            logging.error(f"Request error: {e}")
             return None
