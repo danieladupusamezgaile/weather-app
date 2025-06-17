@@ -1,12 +1,11 @@
-import requests
-import json
 import tkinter as tk
 from tkinter import messagebox
+from weather_api import WeatherAPI
 
 class WeatherApp:
-    def __init__(self, api_key, root):
+    def __init__(self, root, api_key):
         self.api_key = api_key
-        self.base_url = "http://api.openweathermap.org/data/2.5/weather"
+        self.weather_api = WeatherAPI(api_key)
         
         # Set up Tkinter window
         self.root = root
@@ -41,26 +40,7 @@ class WeatherApp:
         
         self.weather_label = tk.Label(self.result_frame, text="", bg="#AEE0F5", font=("Arial", 14))
         self.weather_label.pack()
-        
-
-    def get_weather(self, city_name):
-        # Get the weather data from API for the specified city.
-        url = f"{self.base_url}?q={city_name}&appid={self.api_key}&units=metric"
-        
-        try:
-            response = requests.get(url)
-            response.raise_for_status()  # Will raise an exception for bad responses
-
-            # Check if the status code is 200 (OK)
-            if response.status_code == 200:
-                return response.json()  # Return the JSON data
-            else:
-                print(f"Error: {response.status_code}")
-                return None
-
-        except requests.exceptions.RequestException as e:
-            print(f"Error with the request: {e}")
-            return None
+    
 
     def display_weather(self, data):
         # Display the weather data
@@ -85,7 +65,7 @@ class WeatherApp:
         """Get the city name from the input field and display weather."""
         city_name = self.city_entry.get()
         if city_name:
-            weather_data = self.get_weather(city_name)
+            weather_data = self.weather_api.get_weather(city_name)
             self.display_weather(weather_data)
         else:
             self.display_error("Please enter a city name.")
@@ -99,6 +79,6 @@ class WeatherApp:
 if __name__ == "__main__":
     api_key = "483ed8f60b49f5c00d745614df7a0026"
     root = tk.Tk()  # Initialize the Tkinter window
-    app = WeatherApp(api_key, root)  # Create an instance of WeatherApp
+    app = WeatherApp(root, api_key)  # Create an instance of WeatherApp
     app.run()  # Run the app
     
