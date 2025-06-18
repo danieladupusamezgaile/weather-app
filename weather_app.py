@@ -1,5 +1,5 @@
 import tkinter as tk
-from weather_api import WeatherAPI
+from weather_api import WeatherAPI, WeatherAPIException
 from tkinter import messagebox, ttk
 import logging
 import math
@@ -107,7 +107,7 @@ class WeatherApp:
             # fetch data in background
             weather_data = self.weather_api.get_weather(city_name)
             self.root.after(0, self.display_weather, weather_data)
-        except Exception as e:
+        except WeatherAPIException as e:
             self.root.after(0, self.display_error, f"Error fetching weather data: {e}")
         finally:
             # Stop the loading indicator on the main thread

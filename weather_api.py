@@ -24,12 +24,16 @@ class WeatherAPI:
                 return response.json()  # Return the JSON data
             else:
                 logging.error(f"Error fetching data for {city_name}. Status code: {response.status_code}")
-                return None
+                raise WeatherAPIException(f"Failed to get weather for city: {city_name}")
 
         except requests.exceptions.Timeout:
             logging.error("Request timed out")
-            return None
+            raise WeatherAPIException("Request timed out")
 
         except requests.exceptions.RequestException as e:
             logging.error(f"Request error: {e}")
-            return None
+            raise WeatherAPIException(f"Request error: {e}")
+
+class WeatherAPIException(Exception):
+    # Custom exception for WeatherAPI errors.
+    pass
