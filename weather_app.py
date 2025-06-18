@@ -29,8 +29,7 @@ class WeatherApp:
         self.weather_info_frame = self._create_weather_info_frame()
         
         # Loading indicator
-        self.loading_indicator = ttk.Progressbar(self.root, orient="horizontal", length=200, mode="indeterminate")
-        
+        self.loading_indicator = ttk.Progressbar(self.root, orient="horizontal", length=200, mode="indeterminate")        
         # Initially, display the city input screen
         self.city_input_frame.pack(fill="both", expand=True)
     
@@ -103,15 +102,21 @@ class WeatherApp:
             self.display_error("Please enter a city name.")
             
     def fetch_weather_in_thread(self, city_name):
+        # Fetch weather data in separate thread to avoid ui freezing
         try:
+            # fetch data in background
             weather_data = self.weather_api.get_weather(city_name)
-            self.display_weather(weather_data)
+            self.root.after(0, self.display_weather, weather_data)
         except Exception as e:
-            self.display_error(f"Error fetching weather data: {e}")
+            self.root.after(0, self.display_error, f"Error fetching weather data: {e}")
         finally:
-            # Stop the loading indicator after the data is fetched
-            self.loading_indicator.stop()
-            self.loading_indicator.pack_forget()
+            # Stop the loading indicator on the main thread
+            self.root.after(0, self.stop_loading_indicator)
+
+    def stop_loading_indicator(self):
+        # stop loading indicator after data is fetched
+        self.loading_indicator.stop()
+        self.loading_indicator.pack_forget()
 
     def display_weather(self, data):
         # Display the weather data
