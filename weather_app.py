@@ -1,5 +1,5 @@
 import tkinter as tk
-from weather_api import WeatherAPI, WeatherAPIException
+from weather_api import WeatherAPI
 from tkinter import messagebox, ttk
 import logging
 import math
@@ -92,6 +92,7 @@ class WeatherApp:
         # Save user input
         city_name = self.city_entry.get()
         if city_name:
+            logging.info(f"Button clicked. Fetching weather for {city_name}")
             # Show the loading indicator
             self.loading_indicator.pack(pady=10)
             self.loading_indicator.start()  # Start the loading animation
@@ -103,15 +104,18 @@ class WeatherApp:
             
     def fetch_weather_in_thread(self, city_name):
         # Fetch weather data in separate thread to avoid ui freezing
+        logging.info(f"Starting background thread to fetch weather for {city_name}")
         try:
-            # fetch data in background
+            # fetch data
             weather_data = self.weather_api.get_weather(city_name)
-            self.root.after(0, self.display_weather, weather_data)
-        except WeatherAPIException as e:
-            self.root.after(0, self.display_error, f"Error fetching weather data: {e}")
+            # Update UI from the main thread
+            self.root.after(0, self.display_weather, weather_data) # root.after(delay, callback, *args)
+        except Exception as e:
+            self.root.after(0, self.display_error, f"Error:  {str(e)}")
         finally:
             # Stop the loading indicator on the main thread
             self.root.after(0, self.stop_loading_indicator)
+            logging.info(f"Background thread finished for {city_name}")
 
     def stop_loading_indicator(self):
         # stop loading indicator after data is fetched
