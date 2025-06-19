@@ -14,17 +14,25 @@ class WeatherAPI:
         url = f"{self.base_url}?q={city_name}&appid={self.api_key}&units=metric"
         
         try:
-            response = requests.get(url)
-            response.raise_for_status()  # Will raise an exception for bad responses
-
+            logging.info(f"Sending request to fetch weather data for {city_name}")
+            # Set a timeout of 5 seconds for api request
+            response = requests.get(url, timeout=5)
+            # response.raise_for_status()  # Will raise an exception for bad responses
+            logging.info(f"Response recieved for {city_name}")
+            # Check if the status code is 404 (City Not Found)
+            if response.status_code == 404:
+                raise Exception(f"City '{city_name}' not found. Please check the city name.")
             # Check if the status code is 200 (OK)
-            if response.status_code == 200:
-                logging.info(f"Successfully fetched weather data for {city_name}")
+            elif response.status_code == 200:
                 return response.json()  # Return the JSON data
             else:
-                logging.error(f"Error fetching data for {city_name}. Status code: {response.status_code}")
-                return None
+                raise Exception(f"Failed to get weather for {city_name}")
+
+        except requests.exceptions.Timeout:
+            raise Exception(f"Request timed out for: {city_name}", )
 
         except requests.exceptions.RequestException as e:
-            logging.error(f"Request error: {e}")
-            return None
+            raise Exception(f"Request error for {city_name}")
+
+        except Exception as e:
+            raise Exception(f"An error occured: {str(e)}")
