@@ -108,14 +108,21 @@ class WeatherApp:
         try:
             # fetch data
             weather_data = self.weather_api.get_weather(city_name)
-            # Update UI from the main thread
-            self.root.after(0, self.display_weather, weather_data) # root.after(delay, callback, *args)
+            self._update_ui(weather_data)
         except Exception as e:
-            self.root.after(0, self.display_error, f"Error:  {str(e)}")
+            self._handle_error(e)
         finally:
             # Stop the loading indicator on the main thread
             self.root.after(0, self.stop_loading_indicator)
             logging.info(f"Background thread finished for {city_name}")
+    
+    def _update_ui(self, weather_data):
+        # Update UI from the main thread
+        self.root.after(0, self.display_weather, weather_data)
+    
+    def _handle_error(self, error):
+        # Handle errors and update ui
+        self.root.after(0, self.display_error, f"Error: {str(error)}")
 
     def stop_loading_indicator(self):
         # stop loading indicator after data is fetched
